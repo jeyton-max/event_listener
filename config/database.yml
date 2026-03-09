@@ -50,6 +50,8 @@ test:
 #
 production:
   <<: *default
-  database: event_listener_production
-  username: event_listener
-  password: <%= ENV["EVENT_LISTENER_DATABASE_PASSWORD"] %>
+  adapter: postgresql  # mysql2 から postgresql に変更
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Render の場合、URL形式で接続情報を管理するのが一般的なので以下を追記
+  url: <%= ENV['DATABASE_URL'] %>

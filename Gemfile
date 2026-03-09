@@ -8,8 +8,15 @@ gem "rails", "~> 7.1.0"
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
 
-# Use mysql as the database for Active Record
-gem "mysql2", "~> 0.5"
+# 開発環境とテスト環境では MySQL を使用する
+group :development, :test do
+  gem "mysql2", "~> 0.5"
+end
+
+# 本番環境（Render）では PostgreSQL を使用する
+group :production do
+  gem "pg"
+end
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"

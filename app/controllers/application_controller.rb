@@ -1,8 +1,15 @@
 # app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
+  before_action :basic_auth
   before_action :set_current_event
 
   private
+
+  def basic_auth
+    authenticate_or_request_with_http_basic do |username, password|
+      username == ENV["BASIC_AUTH_USER"] && password == ENV["BASIC_AUTH_PASSWORD"]
+    end if Rails.env.production?
+  end
 
   def set_current_event
     # 1. パラメータに event_id があればセッションに保存（切り替え時）
