@@ -1,0 +1,14 @@
+ja:
+  activerecord:
+    models:
+      shop: "ショップ"
+    attributes:
+      shop:
+        name: "ショップ名"
+        shipping_name: "代表者氏名"
+        tel: "緊急連絡先"
+        address: "住所"
+  errors:
+    messages:
+      blank: "を入力してください"
+      too_short: "は%{count}文字以上で入力してください"

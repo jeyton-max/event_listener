@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  shop: one
+  event_date: 2026-02-19
+  desk_count: 1
+  round_table_count: 1
+  chair_count: 1
+  is_electric_needed: false
+
+two:
+  shop: two
+  event_date: 2026-02-19
+  desk_count: 1
+  round_table_count: 1
+  chair_count: 1
+  is_electric_needed: false

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EventListener</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    
+    <%# BootstrapをCDN経由で一時的に読み込む（既に導入済みの場合は不要です） %>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </head>
+
+  <body class="bg-light">
+    <%# 作成したヘッダーを呼び出し %>
+    <%= render 'layouts/header' %>
+
+    <main class="container-fluid pb-5">
+      <%# フラッシュメッセージ（通知）の表示欄 %>
+      <% if notice %>
+        <div class="alert alert-success mt-3"><%= notice %></div>
+      <% end %>
+      <% if alert %>
+        <div class="alert alert-danger mt-3"><%= alert %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

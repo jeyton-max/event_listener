@@ -1,0 +1,134 @@
+<% # app/views/shops/index.html.erb %>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+  <h1 style="margin: 0; color: #2c3e50;">出店者管理・配置一覧</h1>
+  <%= link_to layout_shops_path, style: "text-decoration: none;" do %>
+    <div style="background: #3182ce; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <span>🗺️ 会場配置図を確認</span>
+    </div>
+  <% end %>
+</div>
+
+<table class="shop-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+  <thead style="background: #2c3e50; color: white;">
+    <tr>
+      <th style="width: 70px; padding: 15px;">画像</th>
+      <th style="padding: 15px; text-align: left;">ショップ名 / 代表者</th>
+      <th style="width: 180px; padding: 15px; text-align: center;">配置（エリア - No）</th>
+      <th style="padding: 15px; text-align: center;">属性区分</th>
+      <th style="padding: 15px; text-align: center;">設備/配送管理</th>
+      <th style="padding: 15px; text-align: center;">SNS等</th>
+      <th style="padding: 15px; text-align: center;">緊急連絡先</th>
+      <th style="padding: 15px; text-align: center;">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @shops.each do |shop| %>
+      <tr style="border-bottom: 1px solid #edf2f7; vertical-align: middle;">
+        
+        <td style="padding: 12px; text-align: center;">
+          <%= link_to shop_path(shop) do %>
+            <% if shop.layout_image.attached? %>
+              <%= image_tag shop.layout_image, style: "width: 55px; height: 55px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0;" %>
+            <% else %>
+              <div style="width: 55px; height: 55px; background: #f7fafc; border-radius: 10px; font-size: 10px; color: #a0aec0; display: flex; align-items: center; justify-content: center; border: 1px dashed #cbd5e0;">No Pic</div>
+            <% end %>
+          <% end %>
+        </td>
+
+        <td style="padding: 12px;">
+          <%= link_to shop_path(shop), style: "text-decoration: none; color: inherit;" do %>
+            <strong style="font-size: 1.05rem; color: #1a202c;"><%= shop.name %></strong><br>
+            <span style="font-size: 0.8rem; color: #718096;"><%= shop.receipt_name.presence || "ー" %></span>
+          <% end %>
+        </td>
+
+        <td style="padding: 12px; text-align: center;">
+          <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
+            <div style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; border-radius: 4px; padding: 4px 8px; font-size: 0.85rem; font-weight: bold; min-width: 80px;">
+              <%= shop.area.presence || "（エリア未定）" %>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 8px; font-family: monospace; font-weight: bold; color: #4a5568; min-width: 40px;">
+              <%= shop.booth_number.presence || "-" %>
+            </div>
+          </div>
+        </td>
+
+        <td style="padding: 12px; text-align: center;">
+          <div style="display: flex; gap: 4px; justify-content: center;">
+            <% if shop.is_both_days %><span style="background: #a3c4f3; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap;">両日</span><% end %>
+            <% if shop.is_first_time %><span style="background: #ffafcc; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap;">初</span><% end %>
+          </div>
+        </td>
+
+        <% # --- 設備/配送管理 (アイコンのみのシンプル表示) --- %>
+        <td style="padding: 12px; text-align: center;">
+          <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+            <% icon_style = "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 16px; background: #f1f5f9; border: 1px solid #e2e8f0;" %>
+            
+            <% if shop.is_joint_venture %><div title="共同出店" style="<%= icon_style %>">🤝</div><% end %>
+            <% if shop.has_fire %><div title="火器使用" style="<%= icon_style %> background: #fff5f5; border-color: #feb2b2;">🔥</div><% end %>
+            <% if shop.daily_details.any?(&:is_electric_needed) %><div title="電源利用" style="<%= icon_style %> background: #f0fff4; border-color: #9ae6b4;">🔌</div><% end %>
+
+            <% if shop.delivery_needed %>
+              <%
+                # ステータスによって配送アイコンの背景色を微調整
+                bg_color = case shop.delivery_status
+                           when 'unreceived' then "#f1f5f9" # 未着
+                           when 'received'   then "#fef3c7" # 受取済
+                           when 'placed'     then "#c6f6d5" # 配置済
+                           else "#ebf8ff"                   # 発送待ち等
+                           end
+              %>
+              <div title="配送予定（ステータス：<%= shop.delivery_status_name %>）" style="<%= icon_style %> background: <%= bg_color %>;">
+                🚚
+              </div>
+            <% end %>
+          </div>
+        </td>
+
+        <td style="padding: 12px; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <% if shop.instagram_url.present? %>
+              <%= link_to shop.instagram_url, target: "_blank", style: "text-decoration: none; font-size: 1.5rem;" do %>
+                🌎
+              <% end %>
+            <% end %>
+            <div title="SNS投稿済" style="font-size: 1.2rem; color: <%= shop.is_sns_posted ? '#48bb78' : '#cbd5e0' %>;">
+              <%= shop.is_sns_posted ? "✅" : "🔘" %>
+            </div>
+          </div>
+        </td>
+
+        <td style="padding: 12px; text-align: center;">
+          <% if shop.tel.present? %>
+            <%= link_to "tel:#{shop.tel.gsub(/-/, '')}", style: "text-decoration: none; color: #2b6cb0; font-weight: bold; display: flex; flex-direction: column; align-items: center;" do %>
+              <span style="font-size: 1.2rem;">📞</span>
+              <span style="font-size: 0.85rem;"><%= shop.tel %></span>
+            <% end %>
+          <% else %>
+            <span style="color: #cbd5e0;">未登録</span>
+          <% end %>
+        </td>
+
+        <td style="padding: 12px; text-align: center;">
+          <div style="display: flex; gap: 4px; justify-content: center;">
+            <%= link_to "編集", edit_shop_path(shop), style: "padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; text-decoration: none; background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0;" %>
+            <%= link_to "削除", shop_path(shop), 
+                  data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, 
+                  style: "padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; text-decoration: none; background: #fff5f5; color: #c53030; border: 1px solid #feb2b2;" %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div style="margin-top: 30px; display: flex; gap: 15px;">
+  <%= link_to "＋ 新しいショップを登録する", new_shop_path, 
+      class: "btn", 
+      style: "background-color: #2c3e50; padding: 14px 28px; border-radius: 8px; text-decoration: none; color: white; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" %>
+  
+  <button style="background-color: #edf2f7; color: #4a5568; padding: 14px 28px; border-radius: 8px; border: 1px solid #cbd5e0; font-weight: bold; cursor: not-allowed;" title="開発中">
+    💰 請求・精算管理（準備中）
+  </button>
+</div>

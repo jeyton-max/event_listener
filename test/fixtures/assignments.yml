@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  event: one
+  shop: one
+  booth: one
+  event_date: 2026-02-05
+  is_sub_booth: false
+
+two:
+  event: two
+  shop: two
+  booth: two
+  event_date: 2026-02-05
+  is_sub_booth: false

@@ -1,0 +1,150 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS (and SCSS, if configured) file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+
+
+
+/* --- 表（テーブル）全体の余白調整 --- */
+table {
+  width: 100%; /* 画面の幅いっぱいに広げる（お好みで） */
+  border-collapse: collapse; /* 枠線を1本にまとめる */
+  margin-top: 20px;
+}
+
+/* 見出し(th)と中身(td)の両方に余白をたっぷり持たせる */
+th, td {
+  padding: 15px 10px;
+  text-align: left;
+  border-bottom: 1px solid #ccc; /* #eee から #ccc にして少し濃くする */
+}
+
+/* --- 電話番号リンクの修正 --- */
+.tel-link {
+  color: #555;
+  text-decoration: none;
+}
+
+.tel-link:hover {
+  color: #a3c4f3; /* 触れた時だけパステルブルーに */
+}
+
+/* --- ページ全体の余白 --- */
+body {
+  padding: 30px; /* 画面の端からコンテンツを引き離す */
+  line-height: 1.6; /* 行間を少し広げて読みやすく */
+  color: #333;
+}
+
+
+/* ボタンの基本スタイル（全ボタン共通） */
+.btn {
+  display: inline-block;
+  /* 少し横長にして、押しやすく女性らしい柔らかな印象に */
+  padding: 8px 22px;
+  text-decoration: none;
+  /* 角をしっかり丸く（カプセル型） */
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  /* 触れた時にふわっと色が変わる設定 */
+  transition: 0.3s;
+  /* 文字の大きさを調整 */
+  font-size: 14px;
+}
+
+/* 「詳細」：落ち着いたくすみブルー */
+.btn-primary {
+  background-color: #a3c4f3;
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #8fb6ed;
+  /* 浮き上がるような影を少し追加 */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 「編集」：温かみのあるアプリコットベージュ */
+.btn-warning {
+  background-color: #ffd166;
+  color: #5d5d5d;
+}
+.btn-warning:hover {
+  background-color: #ffc84d;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 「削除」：派手すぎない大人なローズピンク */
+.btn-danger {
+  background-color: #ffafcc;
+  color: white;
+}
+.btn-danger:hover {
+  background-color: #ff99bb;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 詳細画面のカードデザイン */
+.shop-card {
+  background-color: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* ほんのり浮かせる */
+  max-width: 600px; /* 広がりすぎないように制限 */
+  margin-bottom: 30px;
+}
+
+/* 項目名（dt）のスタイル */
+.shop-card dt {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 15px;
+  border-left: 3px solid #ffafcc; /* ピンクのアクセント線 */
+  padding-left: 10px;
+}
+
+/* 中身（dd）のスタイル */
+.shop-card dd {
+  font-size: 1.1rem;
+  color: #333;
+  margin-left: 0;
+  padding: 5px 13px;
+  font-weight: bold;
+}
+
+/* 最初の項目のマージン調整 */
+.shop-card dt:first-child {
+  margin-top: 0;
+}
+
+/* 画像コンテナ：横幅をカードに合わせ、縦はある程度制限する */
+.layout-image-container {
+  margin-top: 10px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  overflow: hidden; /* 枠からはみ出た分を隠す */
+  background-color: #f9f9f9;
+  max-width: 100%;
+}
+
+/* 画像本体：横幅を親いっぱいに広げ、縦横比を維持 */
+.layout-image-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 400px; /* 縦に長くなりすぎるのを防ぐ */
+  object-fit: contain; /* 枠内で全体が見えるように収める */
+}

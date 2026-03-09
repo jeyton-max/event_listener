@@ -1,0 +1,53 @@
+<header class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm px-4 mb-4">
+  <div class="container-fluid">
+    <%# 1. イベントアイコン：保存済みのイベントがある場合のみリンク化 %>
+    <div class="me-3">
+      <% if @current_event.persisted? %>
+        <%= link_to edit_event_path(@current_event), title: "イベント詳細・編集", class: "d-block" do %>
+          <% if @current_event.icon_image.attached? %>
+            <%= image_tag @current_event.icon_image, style: "width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #0d6efd;" %>
+          <% else %>
+            <div style="width: 45px; height: 45px; background: #f8f9fa; border-radius: 50%; border: 2px dashed #dee2e6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🗓</div>
+          <% end %>
+        <% end %>
+      <% else %>
+        <%# 未保存の場合はリンクなしのアイコンのみ表示 %>
+        <div style="width: 45px; height: 45px; background: #f8f9fa; border-radius: 50%; border: 2px dashed #dee2e6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;" title="イベントを登録してください">🗓</div>
+      <% end %>
+    </div>
+
+    <%# 2. イベント名ドロップダウン %>
+    <div class="dropdown me-auto">
+      <button class="btn btn-link dropdown-toggle text-dark text-decoration-none p-0" type="button" id="eventSelector" data-bs-toggle="dropdown" aria-expanded="false">
+        <h2 class="h5 mb-0 d-inline-block font-weight-bold">
+          <%= @current_event.name %>
+        </h2>
+      </button>
+      <ul class="dropdown-menu shadow" aria-labelledby="eventSelector">
+        <li class="dropdown-header">表示イベントを切り替え</li>
+        <%# 保存済みのイベントのみリストに表示 %>
+        <% Event.where.not(id: nil).order(start_date: :desc).each do |event| %>
+          <li>
+            <%= link_to event.name, url_for(event_id: event.id), class: "dropdown-item #{'active' if event.id == @current_event.id}" %>
+          </li>
+        <% end %>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <%= link_to "＋ 新規イベント作成", new_event_path, class: "dropdown-item text-success fw-bold" %>
+        </li>
+      </ul>
+    </div>
+
+    <%# 3. 駐車場などのステータス表示 %>
+    <div class="d-flex align-items-center gap-3">
+      <% if @current_event.persisted? && @current_event.parking_info.present? %>
+        <span class="badge bg-light text-dark border p-2" title="<%= @current_event.parking_info %>">
+          🅿️ 駐車場情報あり
+        </span>
+      <% end %>
+      
+      <%= link_to "店舗一覧", shops_path, class: "btn btn-outline-primary btn-sm" %>
+      <%= link_to "配置レイアウト", layout_shops_path, class: "btn btn-outline-secondary btn-sm" %>
+    </div>
+  </div>
+</header>
