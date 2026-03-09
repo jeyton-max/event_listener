@@ -14,7 +14,7 @@ class Shop < ApplicationRecord
   validates :name, presence: true
 
   # 配送ステータスの定義
-  enum delivery_status: {
+  enum :delivery_status, {
     unreceived: 0,   # 未着
     received: 1,     # 受取済
     placed: 2,       # 配置済
