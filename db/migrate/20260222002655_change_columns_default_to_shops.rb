@@ -1,5 +1,6 @@
 class ChangeColumnsDefaultToShops < ActiveRecord::Migration[7.1]
   def change
+    Shop.reset_column_information
     # 既存のNULLをfalse(0)に置き換える
     Shop.where(has_fire: nil).update_all(has_fire: false)
     Shop.where(has_extinguisher: nil).update_all(has_extinguisher: false)
