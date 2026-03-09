@@ -1,12 +1,15 @@
 class ChangeColumnsDefaultToShops < ActiveRecord::Migration[7.1]
-  def change
-    Shop.reset_column_information
-    # 既存のNULLをfalse(0)に置き換える
-    Shop.where(has_fire: nil).update_all(has_fire: false)
-    Shop.where(has_extinguisher: nil).update_all(has_extinguisher: false)
-    Shop.where(is_joint_venture: nil).update_all(is_joint_venture: false)
+  # 👇 マイグレーション専用の身代わりクラス。これで Enum チェックを回避します
+  class MigrationShop < ActiveRecord::Base
+    self.table_name = :shops
+  end
 
-    # README通り、null: false と default: false を設定する
+  def change
+    # 本物の Shop モデルではなく、MigrationShop を使って更新します
+    MigrationShop.where(has_fire: nil).update_all(has_fire: false)
+    MigrationShop.where(has_extinguisher: nil).update_all(has_extinguisher: false)
+    MigrationShop.where(is_joint_venture: nil).update_all(is_joint_venture: false)
+
     change_column_null :shops, :has_fire, false
     change_column_default :shops, :has_fire, from: nil, to: false
 
