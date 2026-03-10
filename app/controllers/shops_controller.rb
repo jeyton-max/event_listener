@@ -72,12 +72,12 @@ class ShopsController < ApplicationController
     params.require(:shop).permit(
       :name, :receipt_name, :shipping_name, :tel, :zip_code, :address, 
       :region, :category, :attendance_type, :is_first_time, :is_both_days, 
-      :booth_count, :is_sns_posted, :power_usage, :power_purpose, :pr_text, 
+      :booth_count, :is_sns_posted, :has_power, :pr_text, 
       :instagram_url, :image_url, :layout_image,
       :is_joint_venture, :joint_partner_name, :has_fire, :fire_type, :has_extinguisher,
       :area, :booth_number,
       :delivery_needed, :delivery_count, :delivery_tracking_number, :delivery_status,
-      daily_details_attributes: [:id, :event_date, :desk_count, :round_table_count, :chair_count, :is_electric_needed]
+      daily_details_attributes: [:id, :event_date, :desk_count, :round_table_count, :chair_count, :is_electric_needed, :power_usage, :power_purpose]
     )
   end
 end

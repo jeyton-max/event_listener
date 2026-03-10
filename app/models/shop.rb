@@ -68,6 +68,8 @@ class Shop < ApplicationRecord
     daily_details.each do |detail|
       total += (detail.desk_count || 0) * EQUIPMENT_PRICES[:desk]
       total += (detail.round_table_count || 0) * EQUIPMENT_PRICES[:round_table]
+      
+      # 日別のチェックボックスがONなら、その日の電力料を加算
       total += EQUIPMENT_PRICES[:power] if detail.is_electric_needed
     end
     total
@@ -76,6 +78,17 @@ class Shop < ApplicationRecord
   # 総計
   def grand_total
     total_booth_fee + total_equipment_fee
+  end
+
+  # 指定した日付に電力が必要かどうかを判定（配置図出し分け用）
+  def electric_needed_on?(date)
+    return false if date.nil?
+    daily_details.find_by(event_date: date.to_date)&.is_electric_needed || false
+  end
+
+  # 1日でも電力を使う日があるか？（一覧画面などの⚡マーク用）
+  def any_electric_needed?
+    daily_details.any?(&:is_electric_needed)
   end
 
   private

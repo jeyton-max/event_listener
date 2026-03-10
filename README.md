@@ -47,8 +47,7 @@ Things you may want to cover:
 | fire_type | string | | 使用火器の詳細（ガス、炭火、IH等） |
 | has_extinguisher | boolean | null: false, default: false | 消火器持込確認（安全管理用） |
 | is_sns_posted | boolean | default: false | SNS投稿済チェック |
-| power_usage | integer | | 使用アンペア数 |
-| power_purpose | string | | 電力使用用途 |
+| has_power | boolean | null: false, default: false | 電力使用フラグ（配置図⚡マーク表示用） |
 | pr_text | text | | AI生成PR文 |
 | instagram_url | string | null: false | アカウントURL |
 | image_url | text | | 配置用画像URL（AIが後に取得） |
@@ -70,6 +69,8 @@ Things you may want to cover:
 | round_table_count | integer | null: false, default: 0 | 丸テーブル数（1日500円/台） |
 | chair_count | integer | null: false, default: 0 | 椅子数（無料） |
 | is_electric_needed | boolean | null: false, default: false | 電力使用の有無（1日500円） |
+| power_usage | integer | | 使用アンペア数 |
+| power_purpose | string | | 電力使用用途 |
 
 ### booths テーブル（会場設備）
 | Column | Type | Options | Description |

@@ -72,7 +72,7 @@
         </div>
       </div>
 
-      <%# 🪑 備品・電力管理（編集可能） %>
+      <%# 🪑 日別備品・電力管理 %>
       <div class="mb-4 p-3 border rounded bg-white shadow-sm">
         <label class="fw-bold mb-2">🪑 日別備品・電力内訳</label>
         <div class="table-responsive">
@@ -85,12 +85,36 @@
             <tbody>
               <%= f.fields_for :daily_details do |df| %>
                 <% if df.object.persisted? %>
+                  <%# --- 基本入力行 --- %>
                   <tr>
                     <td class="small fw-bold"><%= df.object.event_date.strftime("%m/%d") %></td>
                     <td><%= df.number_field :desk_count, min: 0, class: "form-control form-control-sm", style: "width: 55px;" %></td>
                     <td><%= df.number_field :round_table_count, min: 0, class: "form-control form-control-sm", style: "width: 55px;" %></td>
                     <td><%= df.number_field :chair_count, min: 0, class: "form-control form-control-sm", style: "width: 55px;" %></td>
-                    <td><%= df.check_box :is_electric_needed, class: "form-check-input" %></td>
+                    <td>
+                      <%# クラス名を追加し、data属性でターゲット行を指定 %>
+                      <%= df.check_box :is_electric_needed, 
+                          class: "form-check-input power-row-toggle", 
+                          data: { target: "power-detail-#{df.index}" } %>
+                    </td>
+                  </tr>
+                  
+                  <%# --- ⚡ 電力詳細行（チェック時のみ出現） --- %>
+                  <tr id="power-detail-<%= df.index %>" 
+                      class="power-detail-row" 
+                      style="display: <%= df.object.is_electric_needed ? 'table-row' : 'none' %>; background-color: #fffdf0;">
+                    <td colspan="5">
+                      <div class="row g-2 p-2">
+                        <div class="col-md-3">
+                          <%= df.label :power_usage, "電力量（A）", class: "small fw-bold" %>
+                          <%= df.number_field :power_usage, min: 0, class: "form-control form-control-sm", placeholder: "例: 15" %>
+                        </div>
+                        <div class="col-md-9">
+                          <%= df.label :power_purpose, "使用用途", class: "small fw-bold" %>
+                          <%= df.text_field :power_purpose, class: "form-control form-control-sm", placeholder: "例: ホットプレート" %>
+                        </div>
+                      </div>
+                    </td>
                   </tr>
                 <% end %>
               <% end %>
@@ -202,5 +226,28 @@
     deliveryToggle?.addEventListener('change', function() {
       deliveryFields.style.display = this.checked ? 'block' : 'none';
     });
+
+    // --- 日別電力詳細の表示切り替え（強化版） ---
+    const powerToggles = document.querySelectorAll('.power-row-toggle');
+
+    powerToggles.forEach(toggle => {
+      // 1. ページ読み込み時の初期状態を反映させる関数
+      const updateDisplay = (checkbox) => {
+        const targetId = checkbox.dataset.target;
+        const detailRow = document.getElementById(targetId);
+        if (detailRow) {
+          detailRow.style.display = checkbox.checked ? 'table-row' : 'none';
+        }
+      };
+
+      // 実行：初期表示
+      updateDisplay(toggle);
+
+      // 実行：クリック時
+      toggle.addEventListener('change', function() {
+        updateDisplay(this);
+      });
+    });
+
   });
 </script>

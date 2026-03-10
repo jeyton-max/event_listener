@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_03_140143) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_10_130456) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -72,6 +72,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_03_140143) do
     t.boolean "is_electric_needed", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "power_usage"
+    t.string "power_purpose"
     t.index ["shop_id"], name: "index_daily_details_on_shop_id"
   end
 
@@ -135,6 +137,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_03_140143) do
     t.string "delivery_tracking_number"
     t.integer "delivery_status", default: 0
     t.bigint "event_id", null: false
+    t.boolean "has_power", default: false, null: false
     t.index ["event_id"], name: "index_shops_on_event_id"
   end
 
