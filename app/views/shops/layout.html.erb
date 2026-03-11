@@ -1,18 +1,31 @@
 <div data-controller="layout" style="display: flex; gap: 20px; padding: 20px; background: #f4f7f6; min-height: 100vh; font-family: sans-serif;">
   
+  <%# --- ① サイドバー：ショップ選択エリア --- %>
   <div style="width: 280px; position: sticky; top: 20px; height: calc(100vh - 40px); background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-y: auto; flex-shrink: 0;">
     <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">① ショップを選択</h3>
     <div id="unassigned-shops" style="display: flex; flex-direction: column; gap: 10px;">
       <% @unassigned_shops.each do |shop| %>
         <div class="shop-drag-item" data-action="click->layout#selectShop" data-shop-id="<%= shop.id %>" 
              style="cursor: pointer; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; background: white; display: flex; align-items: center; gap: 10px;">
-          <div style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; background: #f7fafc; flex-shrink: 0;">
+          
+          <%# 画像コンテナ %>
+          <div style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; background: #f7fafc; flex-shrink: 0; position: relative;">
             <% if shop.layout_image.attached? %>
               <%= image_tag shop.layout_image, style: "width: 100%; height: 100%; object-fit: cover;" %>
+              
+              <%# 画像に重なるショップ名ラベル --- %>
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.5rem; text-align: center; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <%= shop.name %>
+              </div>
+              <%# ------------------------------------ %>
+            <% else %>
+              <%# 画像がない場合の代わり %>
+              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #cbd5e0; background: #edf2f7;">NO IMG</div>
             <% end %>
           </div>
-          <div>
-            <div class="shop-name" style="font-weight: bold; font-size: 0.85rem;"><%= shop.name %></div>
+
+          <div style="overflow: hidden;">
+            <div class="shop-name" style="font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= shop.name %></div>
             <div style="font-size: 0.75rem; color: #718096;"><%= shop.category %></div>
           </div>
         </div>
@@ -20,6 +33,7 @@
     </div>
   </div>
 
+  <%# --- ② メインエリア：会場配置図 --- %>
   <div style="flex: 1; display: flex; flex-direction: column; gap: 25px; align-items: center;">
     
     <div style="width: 100%; max-width: 950px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;">
@@ -37,6 +51,7 @@
         </div>
 
         <div style="display: flex; justify-content: center; position: relative;">
+          <%# --- 左側列 --- %>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <% if wing_id == "A" %>
               <% [9, 10, 11, 12].each do |i| %>
@@ -64,6 +79,7 @@
 
           <div style="width: 60px; margin: 0 20px;"></div>
 
+          <%# --- 右側列 --- %>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <% (1..8).each do |i| %>
               <div class="booth-target" data-booth-id="<%= wing_id %>-<%= i %>" data-action="click->layout#placeInBooth" style="width: 130px; height: 80px; border: 2px dashed #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -72,6 +88,7 @@
             <% end %>
           </div>
 
+          <%# --- キッチンカーエリア（B棟のみ） --- %>
           <% if wing_id == "B" %>
             <div style="position: absolute; right: 0; top: 80px; display: flex; flex-direction: column; gap: 10px;">
               <% (1..6).each do |i| %>

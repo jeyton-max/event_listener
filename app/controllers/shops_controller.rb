@@ -5,12 +5,17 @@ class ShopsController < ApplicationController
   end
 
   def layout
-    # 修正：event_id で絞り込まれたショップの中から、未配置・配置済みを分ける
-    @unassigned_shops = @current_event.shops.where(area: [nil, ""])
-    @assigned_shops = @current_event.shops.where.not(area: [nil, ""])
+    # .with_attached_layout_image を追加して画像をプリロード
+    # また、ビューの判定に合わせて area ではなく booth_number での絞り込みに統一します
+    @unassigned_shops = @current_event.shops
+                                      .where(booth_number: [nil, ""])
+                                      .with_attached_layout_image
     
-    # 将来的に event.areas (プロムナード, HIROPPA...) からブースを動的に生成するための準備
-    # 現在は仮データを置いておきます
+    @assigned_shops   = @current_event.shops
+                                      .where.not(booth_number: [nil, ""])
+                                      .with_attached_layout_image
+    
+    # 将来的に event.areas からブースを動的に生成するための準備
     @booths = [
       { id: "A-1", top: 100, left: 50,  category: "スイーツ", label: "プロムナード入口" },
       { id: "A-2", top: 220, left: 50,  category: "雑貨",     label: "プロムナード中央" }
