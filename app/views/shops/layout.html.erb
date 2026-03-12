@@ -2,39 +2,64 @@
   
   <%# --- ① サイドバー：ショップ選択エリア --- %>
   <div style="width: 280px; position: sticky; top: 20px; height: calc(100vh - 40px); background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-y: auto; flex-shrink: 0;">
+
+    <%# --- 運営用操作パネル --- %>
+    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #edf2f7;">
+      <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #2d3748;">🛠 運営用ツール</h3>
+      <button 
+        data-action="click->layout#addFlexibleBooth" 
+        data-event-id="<%= @current_event.id %>"
+        style="width: 100%; padding: 12px; background: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: background 0.2s;"
+        onmouseover="this.style.background='#2b6cb0'"
+        onmouseout="this.style.background='#3182ce'">
+        ＋ 自由配置テントを追加
+      </button>
+    </div>
+
     <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">① ショップを選択</h3>
     <div id="unassigned-shops" style="display: flex; flex-direction: column; gap: 10px;">
-      <% @unassigned_shops.each do |shop| %>
-        <div class="shop-drag-item" data-action="click->layout#selectShop" data-shop-id="<%= shop.id %>" 
-             style="cursor: pointer; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; background: white; display: flex; align-items: center; gap: 10px;">
-          
-          <%# 画像コンテナ %>
-          <div style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; background: #f7fafc; flex-shrink: 0; position: relative;">
-            <% if shop.layout_image.attached? %>
-              <%= image_tag shop.layout_image, style: "width: 100%; height: 100%; object-fit: cover;" %>
-              
-              <%# 画像に重なるショップ名ラベル --- %>
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.5rem; text-align: center; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                <%= shop.name %>
-              </div>
-              <%# ------------------------------------ %>
-            <% else %>
-              <%# 画像がない場合の代わり %>
-              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #cbd5e0; background: #edf2f7;">NO IMG</div>
-            <% end %>
-          </div>
+      <% if @unassigned_shops.any? %>
+        <% @unassigned_shops.each do |shop| %>
+          <div class="shop-drag-item" data-action="click->layout#selectShop" data-shop-id="<%= shop.id %>" 
+               style="cursor: pointer; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; background: white; display: flex; align-items: center; gap: 10px;">
+            
+            <div style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; background: #f7fafc; flex-shrink: 0; position: relative;">
+              <% if shop.layout_image.attached? %>
+                <%= image_tag shop.layout_image, style: "width: 100%; height: 100%; object-fit: cover;" %>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.5rem; text-align: center; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  <%= shop.name %>
+                </div>
+              <% else %>
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #cbd5e0; background: #edf2f7;">NO IMG</div>
+              <% end %>
+            </div>
 
-          <div style="overflow: hidden;">
-            <div class="shop-name" style="font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= shop.name %></div>
-            <div style="font-size: 0.75rem; color: #718096;"><%= shop.category %></div>
+            <div style="overflow: hidden;">
+              <div class="shop-name" style="font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= shop.name %></div>
+              <div style="font-size: 0.75rem; color: #718096;"><%= shop.category %></div>
+            </div>
           </div>
-        </div>
+        <% end %>
+      <% else %>
+        <p style="text-align: center; color: #a0aec0; font-size: 0.8rem;">未配置のショップはありません</p>
       <% end %>
     </div>
   </div>
 
   <%# --- ② メインエリア：会場配置図 --- %>
-  <div style="flex: 1; display: flex; flex-direction: column; gap: 25px; align-items: center;">
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 25px; align-items: center; position: relative;">
+
+    <%# --- 自由配置テントの描画 --- %>
+    <% @flexible_booths.each do |booth| %>
+      <div class="flexible-booth-item" 
+           style="position: absolute; top: <%= booth.pos_y || 100 %>px; left: <%= booth.pos_x || 100 %>px; z-index: 500; cursor: move;"
+           data-booth-id="<%= booth.id %>"
+           data-action="mousedown->layout#startDrag">
+        <div style="background: #ebf8ff; border: 2px solid #3182ce; border-radius: 8px; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100px; text-align: center;">
+          <span style="font-weight: bold; font-size: 0.8rem; color: #2b6cb0;"><%= booth.booth_code %></span>
+        </div>
+      </div>
+    <% end %>
     
     <div style="width: 100%; max-width: 950px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;">
       <h2 style="margin: 0; font-size: 1.2rem;">会場配置図（プロムナード）</h2>
@@ -90,9 +115,14 @@
 
           <%# --- キッチンカーエリア（B棟のみ） --- %>
           <% if wing_id == "B" %>
-            <div style="position: absolute; right: 0; top: 80px; display: flex; flex-direction: column; gap: 10px;">
+            <%# 修正ポイント：absoluteに戻し、rightの値を調整して距離を空けます %>
+            <div style="position: absolute; right: -170px; top: 0; display: flex; flex-direction: column; gap: 15px; width: 140px;">
+              <h5 style="margin: 0; font-size: 0.8rem; color: #718096; text-align: center; background: #edf2f7; padding: 4px; border-radius: 4px;">キッチンカー</h5>
               <% (1..6).each do |i| %>
-                <div class="booth-target" data-booth-id="KC-<%= i %>" data-action="click->layout#placeInBooth" style="width: 130px; height: 80px; border: 2px dashed #cbd5e0; background: #fafafa; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <div class="booth-target" 
+                    data-booth-id="KC-<%= i %>" 
+                    data-action="click->layout#placeInBooth" 
+                    style="width: 130px; height: 85px; border: 2px dashed #cbd5e0; background: #fafafa; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
                   <span style="font-weight: bold; color: #a0aec0; font-size: 0.75rem;">KC-<%= i %></span>
                 </div>
               <% end %>

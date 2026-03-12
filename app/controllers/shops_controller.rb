@@ -5,21 +5,20 @@ class ShopsController < ApplicationController
   end
 
   def layout
-    # .with_attached_layout_image を追加して画像をプリロード
-    # また、ビューの判定に合わせて area ではなく booth_number での絞り込みに統一します
+    @current_event = Event.find(params[:event_id])
+    
+    # 未配置ショップ：booth_number が nil または 空文字 のもの
     @unassigned_shops = @current_event.shops
-                                      .where(booth_number: [nil, ""])
+                                      .where("booth_number IS NULL OR booth_number = ''")
                                       .with_attached_layout_image
     
-    @assigned_shops   = @current_event.shops
-                                      .where.not(booth_number: [nil, ""])
-                                      .with_attached_layout_image
-    
-    # 将来的に event.areas からブースを動的に生成するための準備
-    @booths = [
-      { id: "A-1", top: 100, left: 50,  category: "スイーツ", label: "プロムナード入口" },
-      { id: "A-2", top: 220, left: 50,  category: "雑貨",     label: "プロムナード中央" }
-    ]
+    # 配置済みショップ（念のため取得）
+    @assigned_shops = @current_event.shops
+                                    .where("booth_number IS NOT NULL AND booth_number != ''")
+                                    .with_attached_layout_image
+
+    # 自由配置テント：これを確実に取得する（変数名を統一）
+    @flexible_booths = @current_event.booths.where(is_flexible: true)
   end
   
   def show

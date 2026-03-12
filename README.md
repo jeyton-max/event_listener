@@ -75,9 +75,11 @@ Things you may want to cover:
 ### booths テーブル（会場設備）
 | Column | Type | Options | Description |
 | --- | --- | --- | --- |
+| event_id | bigint | null: false, foreign_key: true | 関連イベントID（どの開催回に属するか） |
 | booth_code | string | null: false | ブース番号（A-1等） |
 | area_category | string | null: false | エリア名 |
 | is_admin_only | boolean | null: false, default: false | 運営専用フラグ |
+| is_flexible | boolean | null: false, default: false | 自由配置フラグ（座標で管理するか否か） |
 | has_outlet | boolean | null: false, default: false | コンセント有無 |
 | pos_x | float | | 配置図内の横座標 |
 | pos_y | float | | 配置図内の縦座標 |

@@ -1,7 +1,7 @@
 <% # app/views/shops/index.html.erb %>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
   <h1 style="margin: 0; color: #2c3e50;">出店者管理・配置一覧</h1>
-  <%= link_to layout_shops_path, style: "text-decoration: none;" do %>
+  <%= link_to layout_event_shops_path(@current_event), style: "text-decoration: none;" do %>
     <div style="background: #3182ce; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
       <span>🗺️ 会場配置図（閲覧）</span>
     </div>

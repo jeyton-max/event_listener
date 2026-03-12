@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_10_130456) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_12_091440) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -57,10 +57,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_10_130456) do
     t.string "area_category", null: false
     t.boolean "is_admin_only", default: false, null: false
     t.boolean "has_outlet", default: false, null: false
-    t.float "pos_x"
-    t.float "pos_y"
+    t.float "pos_x", default: 0.0
+    t.float "pos_y", default: 0.0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_flexible", default: false, null: false
+    t.bigint "event_id", null: false
+    t.index ["event_id"], name: "index_booths_on_event_id"
   end
 
   create_table "daily_details", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -146,6 +149,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_10_130456) do
   add_foreign_key "assignments", "booths"
   add_foreign_key "assignments", "events"
   add_foreign_key "assignments", "shops"
+  add_foreign_key "booths", "events"
   add_foreign_key "daily_details", "shops"
   add_foreign_key "operation_settings", "events"
   add_foreign_key "shops", "events"

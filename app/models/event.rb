@@ -1,6 +1,7 @@
 class Event < ApplicationRecord
   has_many :assignments, dependent: :destroy
   has_many :operation_settings, dependent: :destroy
+  has_many :booths, dependent: :destroy
   
   has_many :shops, dependent: :destroy
   # 画像管理（Active Storage）の設定
