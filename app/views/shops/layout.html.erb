@@ -1,47 +1,45 @@
-<div data-controller="layout" style="display: flex; gap: 20px; padding: 20px; background: #f4f7f6; min-height: 100vh; font-family: sans-serif;">
-  
+<div data-controller="layout" 
+     style="display: flex; gap: 20px; padding: 20px; background: #f4f7f6; min-height: 100vh; font-family: sans-serif; 
+            max-width: 1250px; margin: 0 auto;"> 
+
   <%# --- ① サイドバー：ショップ選択エリア --- %>
   <div style="width: 280px; position: sticky; top: 20px; height: calc(100vh - 40px); background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-y: auto; flex-shrink: 0;">
 
-    <%# --- 運営用操作パネル --- %>
     <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #edf2f7;">
       <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #2d3748;">🛠 運営用ツール</h3>
       <button 
         data-action="click->layout#addFlexibleBooth" 
         data-event-id="<%= @current_event.id %>"
-        style="width: 100%; padding: 12px; background: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: background 0.2s;"
-        onmouseover="this.style.background='#2b6cb0'"
-        onmouseout="this.style.background='#3182ce'">
+        style="width: 100%; padding: 12px; background: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: background 0.2s;">
         ＋ 自由配置テントを追加
       </button>
     </div>
 
     <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">① ショップを選択</h3>
     <div id="unassigned-shops" style="display: flex; flex-direction: column; gap: 10px;">
-      <% if @unassigned_shops.any? %>
+      <%# コントローラーで @unassigned_shops が正しく取得できればここに並びます %>
+      <% if @unassigned_shops.present? && @unassigned_shops.any? %>
         <% @unassigned_shops.each do |shop| %>
           <div class="shop-drag-item" data-action="click->layout#selectShop" data-shop-id="<%= shop.id %>" 
-               style="cursor: pointer; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; background: white; display: flex; align-items: center; gap: 10px;">
-            
-            <div style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; background: #f7fafc; flex-shrink: 0; position: relative;">
+               style="cursor: pointer; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; background: white; display: flex; align-items: center; gap: 10px; transition: border-color 0.2s;">
+            <div style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; background: #f7fafc; flex-shrink: 0; border: 1px solid #edf2f7;">
               <% if shop.layout_image.attached? %>
-                <%= image_tag shop.layout_image, style: "width: 100%; height: 100%; object-fit: cover;" %>
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.5rem; text-align: center; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  <%= shop.name %>
-                </div>
+                <%= image_tag url_for(shop.layout_image), style: "width: 100%; height: 100%; object-fit: cover;" %>
               <% else %>
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #cbd5e0; background: #edf2f7;">NO IMG</div>
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #cbd5e0;">NO IMG</div>
               <% end %>
             </div>
-
             <div style="overflow: hidden;">
-              <div class="shop-name" style="font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= shop.name %></div>
+              <div style="font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= shop.name %></div>
               <div style="font-size: 0.75rem; color: #718096;"><%= shop.category %></div>
             </div>
           </div>
         <% end %>
       <% else %>
-        <p style="text-align: center; color: #a0aec0; font-size: 0.8rem;">未配置のショップはありません</p>
+        <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e0;">
+          <p style="margin: 0; color: #a0aec0; font-size: 0.8rem;">未配置のショップはありません</p>
+          <p style="margin: 5px 0 0 0; color: #cbd5e0; font-size: 0.7rem;">(Event ID: <%= @current_event.id %>)</p>
+        </div>
       <% end %>
     </div>
   </div>
@@ -49,7 +47,7 @@
   <%# --- ② メインエリア：会場配置図 --- %>
   <div style="flex: 1; display: flex; flex-direction: column; gap: 25px; align-items: center; position: relative;">
 
-    <%# --- 自由配置テントの描画 --- %>
+    <%# 自由配置テント %>
     <% @flexible_booths.each do |booth| %>
       <div class="flexible-booth-item" 
            style="position: absolute; top: <%= booth.pos_y || 100 %>px; left: <%= booth.pos_x || 100 %>px; z-index: 500; cursor: move;"
@@ -57,16 +55,25 @@
            data-action="mousedown->layout#startDrag">
         <div style="background: #ebf8ff; border: 2px solid #3182ce; border-radius: 8px; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100px; text-align: center;">
           <span style="font-weight: bold; font-size: 0.8rem; color: #2b6cb0;"><%= booth.booth_code %></span>
+          <% assigned_shop = @assigned_shops.find { |s| s.booth_number == booth.booth_code } %>
+          <% if assigned_shop %>
+            <div style="margin-top: 5px; border-top: 1px solid #bee3f8; padding-top: 5px;">
+              <% if assigned_shop.layout_image.attached? %>
+                <%= image_tag url_for(assigned_shop.layout_image), style: "width: 25px; height: 25px; border-radius: 3px; object-fit: cover;" %>
+              <% end %>
+              <div style="font-size: 0.65rem; font-weight: bold; color: #2d3748;"><%= assigned_shop.name %></div>
+            </div>
+          <% end %>
         </div>
       </div>
     <% end %>
     
-    <div style="width: 100%; max-width: 950px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;">
+    <div style="width: 100%; max-width: 950px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
       <h2 style="margin: 0; font-size: 1.2rem;">会場配置図（プロムナード）</h2>
     </div>
 
     <% ["A", "B", "C"].each do |wing_id| %>
-      <div style="width: 100%; max-width: 950px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; box-sizing: border-box;">
+      <div style="width: 100%; max-width: 950px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h4 style="margin: 0; font-size: 1.4rem;"><%= wing_id %>棟</h4>
@@ -76,55 +83,37 @@
         </div>
 
         <div style="display: flex; justify-content: center; position: relative;">
-          <%# --- 左側列 --- %>
+          <%# 左側列 %>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <% if wing_id == "A" %>
-              <% [9, 10, 11, 12].each do |i| %>
-                <div class="booth-target" data-booth-id="A-<%= i %>" data-action="click->layout#placeInBooth" style="width: 130px; height: 80px; border: 2px dashed #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                  <span style="font-weight: bold; color: #cbd5e0;">A-<%= i %></span>
+            <% booth_range = (wing_id == "A") ? [9, 10, 11, 12, "warehouse", 13, 14, 15] : (9..16).to_a %>
+            <% booth_range.each do |i| %>
+              <% if i == "warehouse" %>
+                <%# --- 💡 運営倉庫のサイズ調整：他ブース(160px x 125px)と合わせる --- %>
+                <div style="width: 160px; height: 125px; background: #f1f5f9; border: 1px solid #cbd5e0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;">
+                  <span style="font-size: 0.8rem; font-weight: bold; color: #4a5568;">運営倉庫</span>
+                  <span style="font-size: 0.65rem; color: #94a3b8;">(6A)</span>
                 </div>
-              <% end %>
-              <div style="width: 130px; height: 80px; background: #f1f5f9; border: 1px solid #cbd5e0; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <span style="font-size: 0.7rem; font-weight: bold; color: #4a5568;">運営倉庫</span>
-                <span style="font-size: 0.6rem; color: #718096;">(6A)</span>
-              </div>
-              <% [13, 14, 15].each do |i| %>
-                <div class="booth-target" data-booth-id="A-<%= i %>" data-action="click->layout#placeInBooth" style="width: 130px; height: 80px; border: 2px dashed #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                  <span style="font-weight: bold; color: #cbd5e0;">A-<%= i %></span>
-                </div>
-              <% end %>
-            <% else %>
-              <% (9..16).each do |i| %>
-                <div class="booth-target" data-booth-id="<%= wing_id %>-<%= i %>" data-action="click->layout#placeInBooth" style="width: 130px; height: 80px; border: 2px dashed #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                  <span style="font-weight: bold; color: #cbd5e0;"><%= wing_id %>-<%= i %></span>
-                </div>
+              <% else %>
+                <%= render 'booth_cell', wing_id: wing_id, i: i %>
               <% end %>
             <% end %>
           </div>
 
           <div style="width: 60px; margin: 0 20px;"></div>
 
-          <%# --- 右側列 --- %>
+          <%# 右側列 %>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <% (1..8).each do |i| %>
-              <div class="booth-target" data-booth-id="<%= wing_id %>-<%= i %>" data-action="click->layout#placeInBooth" style="width: 130px; height: 80px; border: 2px dashed #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                <span style="font-weight: bold; color: #cbd5e0;"><%= wing_id %>-<%= i %></span>
-              </div>
+              <%= render 'booth_cell', wing_id: wing_id, i: i %>
             <% end %>
           </div>
 
-          <%# --- キッチンカーエリア（B棟のみ） --- %>
+          <%# キッチンカー %>
           <% if wing_id == "B" %>
-            <%# 修正ポイント：absoluteに戻し、rightの値を調整して距離を空けます %>
-            <div style="position: absolute; right: -170px; top: 0; display: flex; flex-direction: column; gap: 15px; width: 140px;">
+            <div style="position: absolute; right: -210px; top: 0; display: flex; flex-direction: column; gap: 15px; width: 140px;">
               <h5 style="margin: 0; font-size: 0.8rem; color: #718096; text-align: center; background: #edf2f7; padding: 4px; border-radius: 4px;">キッチンカー</h5>
               <% (1..6).each do |i| %>
-                <div class="booth-target" 
-                    data-booth-id="KC-<%= i %>" 
-                    data-action="click->layout#placeInBooth" 
-                    style="width: 130px; height: 85px; border: 2px dashed #cbd5e0; background: #fafafa; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
-                  <span style="font-weight: bold; color: #a0aec0; font-size: 0.75rem;">KC-<%= i %></span>
-                </div>
+                <%= render 'booth_cell', wing_id: "KC", i: i %>
               <% end %>
             </div>
           <% end %>

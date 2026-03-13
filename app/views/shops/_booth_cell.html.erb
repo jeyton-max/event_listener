@@ -1,0 +1,37 @@
+<%# app/views/shops/_booth_cell.html.erb %>
+<% booth_id = (wing_id == "KC") ? "KC-#{i}" : "#{wing_id}-#{i}" %>
+<% assigned_shop = @assigned_shops.find { |s| s.booth_number == booth_id } %>
+
+<%# 💡 data-assigned-shop-id="<%= assigned_shop&.id % >" を追加しています %>
+<div class="booth-target" 
+     data-booth-id="<%= booth_id %>" 
+     data-assigned-shop-id="<%= assigned_shop&.id %>" 
+     data-action="click->layout#placeInBooth" 
+     style="width: 160px; height: 125px; border: 2px <%= assigned_shop ? 'solid #3182ce' : 'dashed #cbd5e0' %>; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: white; transition: all 0.2s; position: relative; overflow: hidden; box-shadow: <%= assigned_shop ? '0 4px 10px rgba(0,0,0,0.1)' : 'none' %>;">
+  
+  <% if assigned_shop %>
+    <%# --- 配置済みの場合の表示 --- %>
+    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding: 5px;">
+      <div style="flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 5px;">
+        <% if assigned_shop.layout_image.attached? %>
+          <%= image_tag url_for(assigned_shop.layout_image), style: "max-width: 95%; max-height: 80px; object-fit: contain; border-radius: 4px;" %>
+        <% else %>
+          <div style="font-size: 0.6rem; color: #cbd5e0; background: #f8fafc; width: 80%; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">NO IMAGE</div>
+        <% end %>
+      </div>
+
+      <div style="width: 100%; background: rgba(247, 250, 252, 0.9); padding: 4px 0; border-top: 1px solid #edf2f7;">
+        <div style="font-size: 0.85rem; font-weight: bold; color: #2d3748; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 5px;">
+          <%= assigned_shop.name %>
+        </div>
+      </div>
+      
+      <span style="position: absolute; top: 0; left: 0; background: #3182ce; color: white; font-size: 0.6rem; padding: 2px 6px; border-bottom-right-radius: 8px; font-weight: bold;">
+        <%= booth_id %>
+      </span>
+    </div>
+  <% else %>
+    <%# --- 未配置の場合の表示 --- %>
+    <span style="font-weight: bold; color: #cbd5e0; font-size: 1.1rem;"><%= booth_id %></span>
+  <% end %>
+</div>

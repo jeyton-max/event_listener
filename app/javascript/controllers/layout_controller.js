@@ -1,48 +1,71 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static targets = ["shopItem"]
+
   connect() {
-    this.selectedShop = null;
+    this.selectedShopId = null;
     this.draggingElement = null;
   }
 
-  // --- 1. ショップ選択処理（あなたの今のコードを維持：見た目が綺麗です） ---
+  // --- 1. ショップ選択処理 ---
   selectShop(event) {
-    const element = event.currentTarget;
-    this.selectedShop = {
-      id: element.dataset.shopId,
-      name: element.querySelector(".shop-name").innerText,
-      imgSrc: element.querySelector("img") ? element.querySelector("img").src : null
-    };
-
-    document.querySelectorAll(".shop-drag-item").forEach(el => {
-      el.style.border = "1px solid #e2e8f0";
-      el.style.backgroundColor = "white";
+    // 選択済みのスタイルをリセット
+    document.querySelectorAll('.shop-drag-item').forEach(el => {
+      el.style.borderColor = '#e2e8f0';
+      el.style.backgroundColor = 'white';
+      el.style.borderWidth = '1px';
     });
-    element.style.border = "2px solid #3182ce";
-    element.style.backgroundColor = "#ebf8ff";
+
+    const element = event.currentTarget;
+    this.selectedShopId = element.dataset.shopId;
+    
+    // 選択中を強調
+    element.style.borderColor = '#3182ce';
+    element.style.backgroundColor = '#ebf8ff';
+    element.style.borderWidth = '2px';
   }
 
-  // --- 2. 固定ブースへのショップ配置（DB保存機能付き） ---
+  // --- 2. 固定ブースへのショップ配置（配置 & 解除の両方に対応） ---
   placeInBooth(event) {
-    if (!this.selectedShop) {
-      alert("先にショップを選択してください");
+    const booth = event.currentTarget;
+    const boothId = booth.dataset.boothId;
+    const assignedShopId = booth.dataset.assignedShopId; // すでに配置されているショップIDがあるか確認
+
+    // A. ショップ選択中にクリック（配置）
+    if (this.selectedShopId) {
+      this.saveAssignment(this.selectedShopId, boothId);
       return;
     }
 
-    const booth = event.currentTarget;
-    const boothId = booth.dataset.boothId; 
-    const shopId = this.selectedShop.id;
-    const eventId = document.querySelector('[data-event-id]').dataset.eventId;
+    // B. ショップ未選択で、配置済みブースをクリック（配置解除）
+    if (assignedShopId && !this.selectedShopId) {
+      if (confirm("この配置を解除しますか？")) {
+        this.saveAssignment(null, boothId, assignedShopId);
+      }
+    } else if (!assignedShopId) {
+      alert("配置するショップを左のリストから選択してください");
+    }
+  }
 
-    fetch(`/events/${eventId}/shops/${shopId}`, {
+  // --- 3. データベース保存処理（配置・解除共通） ---
+  saveAssignment(shopId, boothId, oldShopId = null) {
+    const eventId = document.querySelector('[data-event-id]').dataset.eventId;
+    
+    // shopId が null の場合は解除（booth_number を null にする）
+    const targetShopId = shopId || oldShopId;
+    const targetBoothNumber = shopId ? boothId : null;
+
+    // パスは前回の修正に合わせた形式を使用（update_booth を想定）
+    fetch(`/events/${eventId}/shops/${targetShopId}/update_booth`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify({ shop: { booth_number: boothId } })
-    }).then(response => {
+      body: JSON.stringify({ booth_number: targetBoothNumber })
+    })
+    .then(response => {
       if (response.ok) {
         window.location.reload();
       } else {
@@ -51,35 +74,25 @@ export default class extends Controller {
     });
   }
 
-  // --- 3. 自由配置テントの新規作成（ここが修正ポイント：確実に保存される形式に） ---
+  // --- 4. 自由配置テントの新規作成（維持） ---
   addFlexibleBooth(event) {
     const eventId = event.currentTarget.dataset.eventId;
-    
     fetch(`/events/${eventId}/booths`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
       },
-      // 💡 boothキーで包み、初期座標を少し中央寄りに（150, 150）設定
       body: JSON.stringify({ 
-        booth: { 
-          is_flexible: true,
-          pos_x: 150, 
-          pos_y: 150 
-        } 
+        booth: { is_flexible: true, pos_x: 150, pos_y: 150 } 
       })
     })
     .then(response => {
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        alert("テントの作成に失敗しました。");
-      }
+      if (response.ok) { window.location.reload(); }
     });
   }
 
-  // --- 4. 自由配置テントのドラッグ＆ドロップ ---
+  // --- 5. 自由配置テントのドラッグ＆ドロップ（維持） ---
   startDrag(event) {
     this.draggingElement = event.currentTarget;
     const rect = this.draggingElement.getBoundingClientRect();
@@ -94,18 +107,15 @@ export default class extends Controller {
 
   doDrag(event) {
     if (!this.draggingElement) return;
-
     const parentRect = this.draggingElement.parentElement.getBoundingClientRect();
     let x = event.clientX - parentRect.left - this.offsetX;
     let y = event.clientY - parentRect.top - this.offsetY;
-
     this.draggingElement.style.left = `${x}px`;
     this.draggingElement.style.top = `${y}px`;
   }
 
   stopDrag(event) {
     if (!this.draggingElement) return;
-
     const boothId = this.draggingElement.dataset.boothId;
     const eventId = document.querySelector('[data-event-id]').dataset.eventId;
     const x = parseInt(this.draggingElement.style.left);

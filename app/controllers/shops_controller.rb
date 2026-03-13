@@ -7,17 +7,16 @@ class ShopsController < ApplicationController
   def layout
     @current_event = Event.find(params[:event_id])
     
-    # 未配置ショップ：booth_number が nil または 空文字 のもの
-    @unassigned_shops = @current_event.shops
-                                      .where("booth_number IS NULL OR booth_number = ''")
-                                      .with_attached_layout_image
+    # このイベントに紐づくショップをすべて取得
+    all_shops = @current_event.shops.with_attached_layout_image.to_a
     
-    # 配置済みショップ（念のため取得）
-    @assigned_shops = @current_event.shops
-                                    .where("booth_number IS NOT NULL AND booth_number != ''")
-                                    .with_attached_layout_image
+    # 【修正ポイント】Rubyのblank?メソッドを使って、
+    # nil, "", " "（スペース）などが含まれるものをすべて「未配置」として抽出
+    @unassigned_shops = all_shops.select { |shop| shop.booth_number.blank? }
+    
+    # booth_number に値が入っているものを「配置済み」とする
+    @assigned_shops = all_shops.reject { |shop| shop.booth_number.blank? }
 
-    # 自由配置テント：これを確実に取得する（変数名を統一）
     @flexible_booths = @current_event.booths.where(is_flexible: true)
   end
   
@@ -68,6 +67,16 @@ class ShopsController < ApplicationController
     @shop = @current_event.shops.find(params[:id])
     @shop.destroy
     redirect_to shops_path, notice: "ショップを削除しました"
+  end
+
+  def update_booth
+    @shop = Shop.find(params[:id])
+    # booth_number を更新（配置解除の場合は nil が送られてくる）
+    if @shop.update(booth_number: params[:booth_number])
+      render json: { status: 'success' }, status: :ok
+    else
+      render json: { status: 'error', message: @shop.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   private
