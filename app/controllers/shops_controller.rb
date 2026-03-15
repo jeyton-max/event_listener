@@ -19,6 +19,20 @@ class ShopsController < ApplicationController
 
     @flexible_booths = @current_event.booths.where(is_flexible: true)
   end
+
+  # 💡 自由配置枠（ブース）を削除・解除するためのアクション
+  def remove_free_booth
+    @event = Event.find(params[:event_id])
+    # 💡 booths.name ではなく booths.booth_code で検索するように修正します
+    @booth = @event.booths.find_by(booth_code: params[:booth_id], is_flexible: true)
+
+    if @booth
+      @booth.destroy
+      redirect_to layout_event_shops_path(@event), notice: "自由配置枠を削除しました。"
+    else
+      redirect_to layout_event_shops_path(@event), alert: "削除対象の枠が見つかりませんでした。"
+    end
+  end
   
   def show
     @shop = @current_event.shops.find(params[:id])

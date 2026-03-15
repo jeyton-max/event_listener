@@ -17,7 +17,6 @@
 
     <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">① ショップを選択</h3>
     <div id="unassigned-shops" style="display: flex; flex-direction: column; gap: 10px;">
-      <%# コントローラーで @unassigned_shops が正しく取得できればここに並びます %>
       <% if @unassigned_shops.present? && @unassigned_shops.any? %>
         <% @unassigned_shops.each do |shop| %>
           <div class="shop-drag-item" data-action="click->layout#selectShop" data-shop-id="<%= shop.id %>" 
@@ -47,21 +46,34 @@
   <%# --- ② メインエリア：会場配置図 --- %>
   <div style="flex: 1; display: flex; flex-direction: column; gap: 25px; align-items: center; position: relative;">
 
-    <%# 自由配置テント %>
+    <%# 💡 自由配置テント描画エリア %>
     <% @flexible_booths.each do |booth| %>
       <div class="flexible-booth-item" 
            style="position: absolute; top: <%= booth.pos_y || 100 %>px; left: <%= booth.pos_x || 100 %>px; z-index: 500; cursor: move;"
            data-booth-id="<%= booth.id %>"
            data-action="mousedown->layout#startDrag">
-        <div style="background: #ebf8ff; border: 2px solid #3182ce; border-radius: 8px; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100px; text-align: center;">
+
+        <%# 💡 追加：自由配置枠削除ボタン（×ボタン） %>
+        <%= button_to remove_free_booth_event_shops_path(event_id: @current_event.id, booth_id: booth.booth_code), 
+                      method: :delete, 
+                      form: { 
+                        data: { turbo_confirm: "この自由配置枠「#{booth.booth_code}」を削除しますか？" },
+                        style: "position: absolute; top: -10px; right: -10px; z-index: 600;" 
+                      },
+                      style: "width: 24px; height: 24px; background: #ef4444; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); padding: 0; line-height: 1;" do %>
+          ×
+        <% end %>
+
+        <div style="background: #ebf8ff; border: 2px solid #3182ce; border-radius: 8px; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 120px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative;">
           <span style="font-weight: bold; font-size: 0.8rem; color: #2b6cb0;"><%= booth.booth_code %></span>
+          
           <% assigned_shop = @assigned_shops.find { |s| s.booth_number == booth.booth_code } %>
           <% if assigned_shop %>
-            <div style="margin-top: 5px; border-top: 1px solid #bee3f8; padding-top: 5px;">
+            <div style="margin-top: 5px; border-top: 1px solid #bee3f8; padding-top: 5px; width: 100%;">
               <% if assigned_shop.layout_image.attached? %>
-                <%= image_tag url_for(assigned_shop.layout_image), style: "width: 25px; height: 25px; border-radius: 3px; object-fit: cover;" %>
+                <%= image_tag url_for(assigned_shop.layout_image), style: "width: 25px; height: 25px; border-radius: 3px; object-fit: cover; margin-bottom: 2px;" %>
               <% end %>
-              <div style="font-size: 0.65rem; font-weight: bold; color: #2d3748;"><%= assigned_shop.name %></div>
+              <div style="font-size: 0.65rem; font-weight: bold; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= assigned_shop.name %></div>
             </div>
           <% end %>
         </div>
@@ -88,7 +100,6 @@
             <% booth_range = (wing_id == "A") ? [9, 10, 11, 12, "warehouse", 13, 14, 15] : (9..16).to_a %>
             <% booth_range.each do |i| %>
               <% if i == "warehouse" %>
-                <%# --- 💡 運営倉庫のサイズ調整：他ブース(160px x 125px)と合わせる --- %>
                 <div style="width: 160px; height: 125px; background: #f1f5f9; border: 1px solid #cbd5e0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;">
                   <span style="font-size: 0.8rem; font-weight: bold; color: #4a5568;">運営倉庫</span>
                   <span style="font-size: 0.65rem; color: #94a3b8;">(6A)</span>
