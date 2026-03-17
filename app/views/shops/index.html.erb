@@ -1,6 +1,5 @@
 <% # app/views/shops/index.html.erb %>
 
-<%# 💡 1. 全体を中央寄せにする外枠（背景や枠線は持たせない） %>
 <div style="max-width: 1250px; margin: 0 auto; padding: 0 1.5rem;">
 
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
@@ -12,13 +11,11 @@
     <% end %>
   </div>
 
-  <%# 💡 2. テーブル本体：ここにある background: white や border を削除しました %>
   <div style="box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: 12px;">
   
     <table class="shop-table" style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: 12px;">
       <thead style="background: #2c3e50; color: white;">
         <tr>
-          <%# 💡 左上の角丸 %>
           <th style="width: 70px; padding: 15px; border-top-left-radius: 12px; border-bottom: none;">画像</th>
           <th style="padding: 15px; text-align: left;">ショップ名 / 代表者</th>
           <th style="width: 180px; padding: 15px; text-align: center;">配置（エリア - No）</th>
@@ -26,13 +23,11 @@
           <th style="padding: 15px; text-align: center;">設備/配送管理</th>
           <th style="padding: 15px; text-align: center;">SNS等</th>
           <th style="padding: 15px; text-align: center;">緊急連絡先</th>
-          <%# 💡 右上の角丸 %>
           <th style="padding: 15px; text-align: center; border-top-right-radius: 12px; border-bottom: none;">操作</th>
         </tr>
       </thead>
       <tbody>
         <% @shops.each_with_index do |shop, index| %>
-          <%# 💡 最後の行だけ下の角を丸くするための判定 %>
           <% is_last = (index == @shops.size - 1) %>
           <tr style="vertical-align: middle;">
             <td style="padding: 12px; text-align: center; border-top: 1px solid #edf2f7; <%= 'border-bottom-left-radius: 12px;' if is_last %>">
@@ -85,8 +80,12 @@
                                when 'placed'     then "#c6f6d5"
                                else "#ebf8ff"
                                end
+                    
+                    # 💡 ツールチップ用の文言を作成（カンマ区切りの番号があれば追加表示）
+                    tracking_info = shop.delivery_tracking_number.present? ? "\n伝票: #{shop.delivery_tracking_number}" : ""
+                    tooltip_text = "配送予定（ステータス：#{shop.delivery_status_i18n rescue shop.delivery_status}）#{tracking_info}"
                   %>
-                  <div title="配送予定（ステータス：<%= shop.delivery_status_name %>）" style="<%= icon_style %> background: <%= bg_color %>;">
+                  <div title="<%= tooltip_text %>" style="<%= icon_style %> background: <%= bg_color %>; cursor: help;">
                     🚚
                   </div>
                 <% end %>
@@ -131,7 +130,6 @@
     </table>
   </div>
 
-  <%# 💡 3. 下部ボタンエリア %>
   <div style="margin-top: 30px; display: flex; gap: 15px; margin-bottom: 50px;">
     <%= link_to "＋ 新しいショップを登録する", new_shop_path, 
         class: "btn", 

@@ -97,12 +97,22 @@
             <strong style="color: #555; font-size: 0.85rem;">予定口数:</strong><br>
             <span style="font-size: 1.2rem; font-weight: bold;"><%= @shop.delivery_count || 0 %> 個</span>
           </div>
+
           <div style="grid-column: span 2;">
             <strong style="color: #555; font-size: 0.85rem;">荷物伝票番号:</strong><br>
-            <span style="font-size: 1.1rem; font-family: monospace; background: #fff; padding: 4px 12px; border-radius: 4px; border: 1px solid #bbf7d0; display: block; margin-top: 5px;">
-              <%= @shop.delivery_tracking_number.presence || "（未登録）" %>
-            </span>
+            <div style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 8px;">
+              <% if @shop.delivery_tracking_number.present? %>
+                <% @shop.delivery_tracking_number.split(',').each do |num| %>
+                  <span style="font-size: 1.1rem; font-family: monospace; background: #fff; padding: 4px 12px; border-radius: 4px; border: 1px solid #bbf7d0; display: inline-block;">
+                    <%= num %>
+                  </span>
+                <% end %>
+              <% else %>
+                <span style="color: #999;">（未登録）</span>
+              <% end %>
+            </div>
           </div>
+
         </div>
       </div>
     </div>

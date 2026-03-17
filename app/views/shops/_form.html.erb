@@ -1,5 +1,5 @@
 <%= form_with(model: shop, local: true, html: { multipart: true }) do |f| %>
-  <%# --- フェーズ1：出店確定情報（常に表示） --- %>
+  <%# --- フェーズ1：出店確定情報 --- %>
   <div class="shop-card mb-4" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
     <h3 style="border-left: 5px solid #2c3e50; padding-left: 10px; margin-bottom: 25px; font-weight: bold;">【フェーズ1】出店確定情報</h3>
     
@@ -18,7 +18,7 @@
         <%= f.select :area, area_options, { include_blank: "エリアを選択してください" }, { class: "form-select", style: "padding: 10px;" } %>
       </div>
 
-      <%# 出店日の確定（一括操作付） %>
+      <%# 出店日の確定 %>
       <div class="col-12 mt-4 p-3" style="background: #f8f9fa; border-radius: 8px;">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <label class="fw-bold">🗓 出店日の確定</label>
@@ -42,7 +42,6 @@
         </div>
       </div>
 
-      <%# インスタ・ブース数 %>
       <div class="col-md-6 mt-3">
         <%= f.label :instagram_url, "出店者のInstagram URL", class: "fw-bold" %><br>
         <%= f.text_field :instagram_url, class: "form-control insta-field", placeholder: "https://www.instagram.com/..." %>
@@ -54,12 +53,11 @@
     </div>
   </div>
 
-  <%# --- フェーズ2：申込詳細情報（編集時のみ表示） --- %>
+  <%# --- フェーズ2：申込詳細情報 --- %>
   <% if shop.persisted? %>
     <div class="shop-card mb-4" style="margin-top: 30px; border-top: 3px solid #3498db; padding: 25px; background-color: #fcfcfc; border-radius: 12px;">
       <h3 style="border-left: 5px solid #3498db; padding-left: 10px; margin-bottom: 25px; font-weight: bold;">【フェーズ2】申込詳細情報</h3>
       
-      <%# 📸 画像アップロード %>
       <div class="row g-3 mb-4">
         <div class="col-md-12 p-3 border-dashed rounded" style="border: 2px dashed #3498db; background: #f0f7ff;">
           <%= f.label :layout_image, "📸 アイコン・写真のアップロード", class: "fw-bold" %><br>
@@ -72,7 +70,6 @@
         </div>
       </div>
 
-      <%# 🪑 日別備品・電力管理 %>
       <div class="mb-4 p-3 border rounded bg-white shadow-sm">
         <label class="fw-bold mb-2">🪑 日別備品・電力内訳</label>
         <div class="table-responsive">
@@ -85,21 +82,17 @@
             <tbody>
               <%= f.fields_for :daily_details do |df| %>
                 <% if df.object.persisted? %>
-                  <%# --- 基本入力行 --- %>
                   <tr>
                     <td class="small fw-bold"><%= df.object.event_date.strftime("%m/%d") %></td>
                     <td><%= df.number_field :desk_count, min: 0, class: "form-control form-control-sm", style: "width: 55px;" %></td>
                     <td><%= df.number_field :round_table_count, min: 0, class: "form-control form-control-sm", style: "width: 55px;" %></td>
                     <td><%= df.number_field :chair_count, min: 0, class: "form-control form-control-sm", style: "width: 55px;" %></td>
                     <td>
-                      <%# クラス名を追加し、data属性でターゲット行を指定 %>
                       <%= df.check_box :is_electric_needed, 
                           class: "form-check-input power-row-toggle", 
                           data: { target: "power-detail-#{df.index}" } %>
                     </td>
                   </tr>
-                  
-                  <%# --- ⚡ 電力詳細行（チェック時のみ出現） --- %>
                   <tr id="power-detail-<%= df.index %>" 
                       class="power-detail-row" 
                       style="display: <%= df.object.is_electric_needed ? 'table-row' : 'none' %>; background-color: #fffdf0;">
@@ -124,7 +117,6 @@
       </div>
 
       <div class="row g-3">
-        <%# 🚒 火器利用 %>
         <div class="col-12 p-3 rounded mb-2" style="background: #fff5f5; border: 1px solid #feb2b2;">
           <h4 style="color: #c53030; font-size: 1rem; font-weight: bold;">🚒 安全管理・火器利用</h4>
           <label class="fw-bold"><%= f.check_box :has_fire %> 火器を使用する</label>
@@ -132,7 +124,7 @@
           <label class="small mt-1"><%= f.check_box :has_extinguisher %> 消火器持込を確認済</label>
         </div>
 
-        <%# 🚚 荷物配送管理 %>
+        <%# 🚚 荷物配送管理（ここを修正） %>
         <div class="col-12 p-3 rounded mb-2" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
           <h4 style="color: #166534; font-size: 1rem; font-weight: bold;">🚚 荷物配送管理</h4>
           <div class="form-check mb-2">
@@ -140,34 +132,34 @@
             <%= f.label :delivery_needed, "事前に会場へ荷物を配送する", class: "form-check-label fw-bold" %>
           </div>
           <div id="delivery_fields" style="display: <%= f.object.delivery_needed ? 'block' : 'none' %>;" class="pt-2 border-top mt-2">
-            <div class="row g-2 align-items-end">
+            <div class="row g-2">
               <div class="col-md-2">
                 <%= f.label :delivery_count, "口数", class: "small fw-bold" %>
-                <%= f.number_field :delivery_count, min: 0, class: "form-control" %>
+                <%= f.number_field :delivery_count, min: 1, id: "delivery_count_input", class: "form-control" %>
               </div>
               <div class="col-md-6">
-                <%= f.label :delivery_tracking_number, "伝票番号", class: "small fw-bold" %>
-                <%= f.text_field :delivery_tracking_number, class: "form-control", placeholder: "伝票番号を入力" %>
+                <label class="small fw-bold">伝票番号</label>
+                <%# 💡 JSで中身を書き換えるコンテナ %>
+                <div id="tracking_numbers_container">
+                  <%# 初期表示用の処理：DBにカンマ区切り等で保存されていることを想定、なければ1つ表示 %>
+                  <% tracking_nums = f.object.delivery_tracking_number.to_s.split(',') %>
+                  <% [tracking_nums.size, 1].max.times do |i| %>
+                    <div class="mb-1">
+                      <input type="text" name="shop[tracking_numbers][]" value="<%= tracking_nums[i] %>" class="form-control" placeholder="伝票番号 <%= i + 1 %>">
+                    </div>
+                  <% end %>
+                </div>
               </div>
               <div class="col-md-4">
                 <%= f.label :delivery_status, "配送状況（事務局）", class: "small fw-bold" %>
                 <%= f.select :delivery_status, 
-                    [
-                      ["未着", "unreceived"], 
-                      ["受取済", "received"], 
-                      ["配置済", "placed"], 
-                      ["発送待ち", "pending_ship"], 
-                      ["完了", "completed"]
-                    ], 
-                    { include_blank: "選択" }, 
-                    { class: "form-select" } 
-                %>
+                    [["未着", "unreceived"], ["受取済", "received"], ["配置済", "placed"], ["発送待ち", "pending_ship"], ["完了", "completed"]], 
+                    { include_blank: "選択" }, { class: "form-select" } %>
               </div>
             </div>
           </div>
         </div>
 
-        <%# 📞 連絡先・代表者情報 %>
         <div class="col-md-6 mt-3">
           <%= f.label :tel, "当日連絡先電話番号", class: "fw-bold" %><br>
           <%= f.text_field :tel, class: "form-control", placeholder: "090-0000-0000" %>
@@ -199,55 +191,53 @@
     btnSelectAll?.addEventListener('click', () => dateChecks.forEach(cb => cb.checked = true));
     btnClearAll?.addEventListener('click', () => dateChecks.forEach(cb => cb.checked = false));
 
-    // --- Instagram URL 自動消去ロジック（強化版） ---
+    // --- Instagram URL ---
     const instaFields = document.querySelectorAll('.insta-field');
     instaFields.forEach(field => {
-      if (field.value.trim() === "") {
-        field.value = "https://";
-      }
-
-      field.addEventListener('focus', function() {
-        if (this.value.trim() === 'https://') {
-          this.value = '';
-        }
-      });
-
-      field.addEventListener('blur', function() {
-        if (this.value.trim() === '') {
-          this.value = 'https://';
-        }
-      });
+      if (field.value.trim() === "") field.value = "https://";
+      field.addEventListener('focus', function() { if (this.value.trim() === 'https://') this.value = ''; });
+      field.addEventListener('blur', function() { if (this.value.trim() === '') this.value = 'https://'; });
     });
 
-    // --- 荷物配送の表示切り替え ---
+    // --- 荷物配送・伝票番号自動増減ロジック ---
     const deliveryToggle = document.getElementById('delivery_toggle');
     const deliveryFields = document.getElementById('delivery_fields');
+    const deliveryCountInput = document.getElementById('delivery_count_input');
+    const trackingContainer = document.getElementById('tracking_numbers_container');
 
+    // 表示切り替え
     deliveryToggle?.addEventListener('change', function() {
       deliveryFields.style.display = this.checked ? 'block' : 'none';
     });
 
-    // --- 日別電力詳細の表示切り替え（強化版） ---
-    const powerToggles = document.querySelectorAll('.power-row-toggle');
+    // 口数に連動した入力欄の増減
+    deliveryCountInput?.addEventListener('input', function() {
+      const count = Math.max(1, parseInt(this.value) || 1);
+      const currentInputs = trackingContainer.querySelectorAll('input');
+      const currentValues = Array.from(currentInputs).map(i => i.value);
+      
+      trackingContainer.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const val = currentValues[i] || '';
+        const html = `
+          <div class="mb-1">
+            <input type="text" name="shop[tracking_numbers][]" value="${val}" class="form-control" placeholder="伝票番号 ${i + 1}">
+          </div>
+        `;
+        trackingContainer.insertAdjacentHTML('beforeend', html);
+      }
+    });
 
+    // --- 日別電力詳細 ---
+    const powerToggles = document.querySelectorAll('.power-row-toggle');
     powerToggles.forEach(toggle => {
-      // 1. ページ読み込み時の初期状態を反映させる関数
       const updateDisplay = (checkbox) => {
         const targetId = checkbox.dataset.target;
         const detailRow = document.getElementById(targetId);
-        if (detailRow) {
-          detailRow.style.display = checkbox.checked ? 'table-row' : 'none';
-        }
+        if (detailRow) detailRow.style.display = checkbox.checked ? 'table-row' : 'none';
       };
-
-      // 実行：初期表示
       updateDisplay(toggle);
-
-      // 実行：クリック時
-      toggle.addEventListener('change', function() {
-        updateDisplay(this);
-      });
+      toggle.addEventListener('change', function() { updateDisplay(this); });
     });
-
   });
 </script>

@@ -70,7 +70,18 @@ class ShopsController < ApplicationController
 
   def update
     @shop = @current_event.shops.find(params[:id])
-    if @shop.update(shop_params)
+
+    # 💡 送信された shop_params を取得
+    attrs = shop_params
+
+    # 💡 配列で届いた伝票番号をカンマ区切りの文字列に変換
+    if params[:shop][:tracking_numbers].present?
+      # 空文字を除去して連結（例: ["A123", "", "B456"] -> "A123,B456"）
+      attrs[:delivery_tracking_number] = params[:shop][:tracking_numbers].reject(&:blank?).join(',')
+    end
+
+    # 💡 加工した attrs で更新
+    if @shop.update(attrs)
       redirect_to shop_path(@shop), notice: "更新しました"
     else
       render :edit, status: :unprocessable_entity
